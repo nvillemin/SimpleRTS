@@ -114,16 +114,19 @@ public class HUD : MonoBehaviour {
 		// Set base position for custom cursor image
 		float leftPos = Input.mousePosition.x;
 		float topPos = Screen.height - Input.mousePosition.y; // screen draw coordinates are inverted
+		topPos -= activeCursor.height / 2;
+		leftPos -= activeCursor.width / 2;
 
 		// Adjust position based on the type of cursor being shown
 		if(activeCursorState == CursorState.PanRight) {
 			leftPos = Screen.width - activeCursor.width;
 		} else if(activeCursorState == CursorState.PanDown) {
+			//leftPos -= activeCursor.width / 2;
 			topPos = Screen.height - activeCursor.height;
 		} else if(activeCursorState == CursorState.Move || activeCursorState == CursorState.Select
 			 || activeCursorState == CursorState.Harvest) {
-			topPos -= activeCursor.height / 2;
-			leftPos -= activeCursor.width / 2;
+			//topPos -= activeCursor.height / 2;
+			//leftPos -= activeCursor.width / 2;
 		}
 		return new Rect(leftPos, topPos, activeCursor.width, activeCursor.height);
 	}
