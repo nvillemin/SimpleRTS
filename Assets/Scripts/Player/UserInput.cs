@@ -4,13 +4,17 @@ using RTS;
 using System;
 
 public class UserInput : MonoBehaviour {
-    private Player player;
+	// --------------------------------------------------------------------------------------------
+	// PRIVATE VARIABLES
+	private Player player;
 
-    // Use this for initialization
-    void Start() {
+	// --------------------------------------------------------------------------------------------
+	// Initialization
+	void Start() {
 	    this.player = transform.root.GetComponent<Player>();
     }
-	
+
+	// --------------------------------------------------------------------------------------------
 	// Update is called once per frame
 	void Update() {
         if(this.player.isHuman) {
@@ -20,13 +24,15 @@ public class UserInput : MonoBehaviour {
         }
     }
 
+	// --------------------------------------------------------------------------------------------
+	// Camera movements
 	private void MoveCamera() {
 		float xPos = Input.mousePosition.x;
 		float yPos = Input.mousePosition.y;
 		Vector3 movement = new Vector3(0, 0, 0);
 		bool mouseScroll = false;
 
-		//horizontal camera movement
+		// horizontal camera movement
 		if(xPos >= 0 && xPos < ResourceManager.ScrollWidth) {
 			movement.x -= ResourceManager.ScrollSpeed;
 			player.hud.SetCursorState(CursorState.PanLeft);
@@ -37,7 +43,7 @@ public class UserInput : MonoBehaviour {
 			mouseScroll = true;
 		}
 
-		//vertical camera movement
+		// vertical camera movement
 		if(yPos >= 0 && yPos < ResourceManager.ScrollWidth) {
 			movement.z -= ResourceManager.ScrollSpeed;
 			player.hud.SetCursorState(CursorState.PanDown);
@@ -78,7 +84,9 @@ public class UserInput : MonoBehaviour {
 		}
 	}
 
-    private void RotateCamera() {
+	// --------------------------------------------------------------------------------------------
+	// Rotate the camera with the ALT key
+	private void RotateCamera() {
 		Vector3 origin = Camera.main.transform.eulerAngles;
 		Vector3 destination = origin;
 
@@ -94,6 +102,7 @@ public class UserInput : MonoBehaviour {
 		}
 	}
 
+	// --------------------------------------------------------------------------------------------
 	// Used to detect when mouse buttons are pressed
 	private void MouseActivity() {
 		if(Input.GetMouseButtonDown(0)) {
@@ -104,6 +113,7 @@ public class UserInput : MonoBehaviour {
 		this.MouseHover();
 	}
 
+	// --------------------------------------------------------------------------------------------
 	// Used to change the cursor when hovering a selectable object
 	private void MouseHover() {
 		if(player.hud.MouseInBounds()) {
@@ -124,6 +134,7 @@ public class UserInput : MonoBehaviour {
 		}
 	}
 
+	// --------------------------------------------------------------------------------------------
 	// Triggered when the left mouse button is clicked
 	private void LeftMouseClick() {
 		if(this.player.hud.MouseInBounds()) {
@@ -133,7 +144,8 @@ public class UserInput : MonoBehaviour {
 				if(this.player.SelectedObject)
 					this.player.SelectedObject.MouseClick(hitObject, hitPoint, this.player);
 				else if(hitObject.name != "Ground") {
-					WorldObject worldObject = hitObject.transform.parent.GetComponent<WorldObject>();
+					WorldObject worldObject = hitObject.transform.parent
+						.GetComponent<WorldObject>();
 					if(worldObject) {
 						//we already know the player has no selected object
 						this.player.SelectedObject = worldObject;
@@ -144,6 +156,7 @@ public class UserInput : MonoBehaviour {
 		}
 	}
 
+	// --------------------------------------------------------------------------------------------
 	// Triggered when the right mouse button is clicked
 	private void RightMouseClick() {
 		if(player.hud.MouseInBounds() && !Input.GetKey(KeyCode.LeftAlt) && player.SelectedObject) {
@@ -152,6 +165,8 @@ public class UserInput : MonoBehaviour {
 		}
 	}
 
+	// --------------------------------------------------------------------------------------------
+	// Raycasting to find the hit object
 	private GameObject FindHitObject() {
 		Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 		RaycastHit hit;
@@ -161,6 +176,8 @@ public class UserInput : MonoBehaviour {
 		return null;
 	}
 
+	// --------------------------------------------------------------------------------------------
+	// Raycasting to find the hit point
 	private Vector3 FindHitPoint() {
 		Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 		RaycastHit hit;
