@@ -97,6 +97,7 @@ public class Unit : WorldObject {
 	}
 
 	// --------------------------------------------------------------------------------------------
+	// Move unit towards the destination
 	private void MakeMove() {
 		this.transform.position = Vector3.MoveTowards(this.transform.position, destination
 			, Time.deltaTime * moveSpeed);

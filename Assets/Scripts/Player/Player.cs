@@ -1,5 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+using RTS;
+using System;
 
 public class Player : MonoBehaviour {
 	// --------------------------------------------------------------------------------------------
@@ -8,10 +11,67 @@ public class Player : MonoBehaviour {
 	public WorldObject SelectedObject { get; set; }
 	public string username;
     public bool isHuman;
+	public int startMoney, startMoneyLimit, startPower, startPowerLimit;
+
+	// --------------------------------------------------------------------------------------------
+	// PRIVATE VARIABLES
+	private Dictionary<ResourceType, int> resources, resourceLimits;
 
 	// --------------------------------------------------------------------------------------------
 	// Initialization
-	void Start () {
+	void Awake() {
+		this.resources = this.InitResourceList();
+		this.resourceLimits = this.InitResourceList();
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Initialization
+	void Start() {
 		this.hud = GetComponentInChildren<HUD>();
+		this.AddStartResourceLimits();
+		this.AddStartResources();
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Called each frame
+	void Update() {
+		if(this.isHuman) {
+			this.hud.SetResourceValues(this.resources, this.resourceLimits);
+		}
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Resources initialization
+	private Dictionary<ResourceType, int> InitResourceList() {
+		Dictionary<ResourceType, int> list = new Dictionary<ResourceType, int>();
+		list.Add(ResourceType.Money, 0);
+		list.Add(ResourceType.Power, 0);
+		return list;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Resource limits initialization
+	private void AddStartResourceLimits() {
+		this.IncrementResourceLimit(ResourceType.Money, this.startMoneyLimit);
+		this.IncrementResourceLimit(ResourceType.Power, this.startPowerLimit);
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Start resources initialization
+	private void AddStartResources() {
+		this.AddResource(ResourceType.Money, this.startMoney);
+		this.AddResource(ResourceType.Power, this.startPower);
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Add resource by type
+	public void AddResource(ResourceType type, int amount) {
+		this.resources[type] += amount;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Increment resource limit by type
+	public void IncrementResourceLimit(ResourceType type, int amount) {
+		this.resourceLimits[type] += amount;
 	}
 }
