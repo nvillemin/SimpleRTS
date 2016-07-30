@@ -113,4 +113,9 @@ public class WorldObject : MonoBehaviour {
 				player.hud.SetCursorState(CursorState.Select);
 		}
 	}
+
+	// --------------------------------------------------------------------------------------------
+	public bool IsOwnedBy(Player owner) {
+		return player && player.Equals(owner);
+	}
 }
