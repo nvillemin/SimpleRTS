@@ -27,5 +27,9 @@ namespace RTS {
 		public static void StoreSelectBoxItems(GUISkin skin) {
 			selectBoxSkin = skin;
 		}
+
+		// --------------------------------------------------------------------------------------------
+		// Building
+		public static int BuildSpeed { get { return 2; } }
 	}
 }
