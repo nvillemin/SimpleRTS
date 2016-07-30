@@ -7,13 +7,14 @@ public class HUD : MonoBehaviour {
 	// CONSTANTS
 	private const int ORDERS_BAR_WIDTH = 150, RESOURCE_BAR_HEIGHT = 40, SELECTION_NAME_HEIGHT = 15,
 		ICON_WIDTH = 32, ICON_HEIGHT = 32, TEXT_WIDTH = 128, TEXT_HEIGHT = 32, 
-		BUILD_IMAGE_WIDTH = 64, BUILD_IMAGE_HEIGHT = 64, BUTTON_SPACING = 7, SCROLL_BAR_WIDTH = 22;
+		BUILD_IMAGE_WIDTH = 64, BUILD_IMAGE_HEIGHT = 64, BUTTON_SPACING = 7, SCROLL_BAR_WIDTH = 22,
+		BUILD_IMAGE_PADDING = 8;
 
 	// --------------------------------------------------------------------------------------------
 	// UNITY VARIABLES
 	public GUISkin resourcesSkin, ordersSkin, selectBoxSkin, mouseCursorSkin;
 	public Texture2D activeCursor, selectCursor, leftCursor, rightCursor, upCursor, downCursor,
-		buttonHover, buttonClick;
+		buttonHover, buttonClick, buildFrame, buildMask;
 	public Texture2D[] moveCursors, attackCursors, harvestCursors, resources;
 
 	// --------------------------------------------------------------------------------------------
@@ -69,14 +70,18 @@ public class HUD : MonoBehaviour {
 	// Draw the bar for the orders
 	private void DrawOrdersBar() {
 		GUI.skin = this.ordersSkin;
-		GUI.BeginGroup(new Rect(Screen.width - ORDERS_BAR_WIDTH, RESOURCE_BAR_HEIGHT,
-			ORDERS_BAR_WIDTH, Screen.height - RESOURCE_BAR_HEIGHT));
-		GUI.Box(new Rect(0, 0, ORDERS_BAR_WIDTH, Screen.height - RESOURCE_BAR_HEIGHT), "");
+		GUI.BeginGroup(new Rect(Screen.width - ORDERS_BAR_WIDTH - BUILD_IMAGE_WIDTH, 
+			RESOURCE_BAR_HEIGHT, ORDERS_BAR_WIDTH + BUILD_IMAGE_WIDTH, 
+			Screen.height - RESOURCE_BAR_HEIGHT));
+		GUI.Box(new Rect(BUILD_IMAGE_WIDTH + SCROLL_BAR_WIDTH, 0, ORDERS_BAR_WIDTH, 
+			Screen.height - RESOURCE_BAR_HEIGHT), "");
 		if(this.player.SelectedObject) {
 			string selectionName = this.player.SelectedObject.objectName;
 			if(!selectionName.Equals("")) {
+				int leftPos = BUILD_IMAGE_WIDTH + SCROLL_BAR_WIDTH / 2;
 				int topPos = this.buildAreaHeight + BUTTON_SPACING;
-				GUI.Label(new Rect(0, topPos, ORDERS_BAR_WIDTH, SELECTION_NAME_HEIGHT), selectionName);
+				GUI.Label(new Rect(leftPos, topPos, ORDERS_BAR_WIDTH, SELECTION_NAME_HEIGHT),
+					selectionName);
 			}
 			if(this.player.SelectedObject.IsOwnedBy(player)) {
 				// reset slider value if the selected object has changed
@@ -86,9 +91,35 @@ public class HUD : MonoBehaviour {
 				this.DrawActions(this.player.SelectedObject.GetActions());
 				// store the current selection
 				this.lastSelection = this.player.SelectedObject;
+
+				Building selectedBuilding = this.lastSelection.GetComponent<Building>();
+				if(selectedBuilding) {
+					this.DrawBuildQueue(selectedBuilding.getBuildQueueValues(),
+						selectedBuilding.getBuildPercentage());
+				}
 			}
 		}
 		GUI.EndGroup();
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Draw the build queue for the selected building
+	private void DrawBuildQueue(string[] buildQueue, float buildPercentage) {
+		for(int i = 0; i < buildQueue.Length; i++) {
+			float topPos = i * BUILD_IMAGE_HEIGHT - (i + 1) * BUILD_IMAGE_PADDING;
+			Rect buildPos = new Rect(BUILD_IMAGE_PADDING, topPos, BUILD_IMAGE_WIDTH, BUILD_IMAGE_HEIGHT);
+			GUI.DrawTexture(buildPos, ResourceManager.GetBuildImage(buildQueue[i]));
+			GUI.DrawTexture(buildPos, this.buildFrame);
+			topPos += BUILD_IMAGE_PADDING;
+			float width = BUILD_IMAGE_WIDTH - 2 * BUILD_IMAGE_PADDING;
+			float height = BUILD_IMAGE_HEIGHT - 2 * BUILD_IMAGE_PADDING;
+			if(i == 0) {
+				// shrink the build mask on the item currently being built to give an idea of progress
+				topPos += height * buildPercentage;
+				height *= (1 - buildPercentage);
+			}
+			GUI.DrawTexture(new Rect(2 * BUILD_IMAGE_PADDING, topPos, width, height), this.buildMask);
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -242,7 +273,7 @@ public class HUD : MonoBehaviour {
 		GUI.skin.button = buttons;
 		int numActions = actions.Length;
 		// define the area to draw the actions inside
-		GUI.BeginGroup(new Rect(0, 0, ORDERS_BAR_WIDTH, this.buildAreaHeight));
+		GUI.BeginGroup(new Rect(BUILD_IMAGE_WIDTH, 0, ORDERS_BAR_WIDTH, buildAreaHeight));
 		// draw scroll bar for the list of actions if need be
 		if(numActions >= this.MaxNumRows(this.buildAreaHeight))
 			this.DrawSlider(this.buildAreaHeight, numActions / 2.0f);
