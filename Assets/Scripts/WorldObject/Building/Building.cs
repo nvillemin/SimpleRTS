@@ -8,10 +8,12 @@ public class Building : WorldObject {
 	// --------------------------------------------------------------------------------------------
 	// UNITY VARIABLES
 	public float maxBuildProgress;
+	public Texture2D rallyPointImage;
 
 	// --------------------------------------------------------------------------------------------
 	// PROTECTED VARIABLES
 	protected Queue<string> buildQueue;
+	protected Vector3 rallyPoint;
 
 	// --------------------------------------------------------------------------------------------
 	// PRIVATE VARIABLES
@@ -19,7 +21,7 @@ public class Building : WorldObject {
 	private Vector3 spawnPoint;
 
 	// --------------------------------------------------------------------------------------------
-	// Initialization
+	// Initialization (before Start)
 	protected override void Awake() {
 		base.Awake();
 		this.buildQueue = new Queue<string>();
@@ -28,9 +30,11 @@ public class Building : WorldObject {
 		float spawnZ = this.selectionBounds.center.z + this.transform.forward.z 
 			+ this.selectionBounds.extents.z + this.transform.forward.z * 10;
 		this.spawnPoint = new Vector3(spawnX, 0.0f, spawnZ);
+		this.rallyPoint = this.spawnPoint;
 	}
 
 	// --------------------------------------------------------------------------------------------
+	// Initialization
 	protected override void Start() {
 		base.Start();
 	}
@@ -60,7 +64,8 @@ public class Building : WorldObject {
 			this.currentBuildProgress += Time.deltaTime * ResourceManager.BuildSpeed;
 			if(this.currentBuildProgress > this.maxBuildProgress) {
 				if(this.player) {
-					this.player.AddUnit(this.buildQueue.Dequeue(), this.spawnPoint, this.transform.rotation);
+					this.player.AddUnit(this.buildQueue.Dequeue(), this.spawnPoint, 
+						this.rallyPoint, this.transform.rotation);
 				}
 				this.currentBuildProgress = 0.0f;
 			}
@@ -69,7 +74,7 @@ public class Building : WorldObject {
 
 	// --------------------------------------------------------------------------------------------
 	// Get all units from queue
-	public string[] getBuildQueueValues() {
+	public string[] GetBuildQueueValues() {
 		string[] values = new string[this.buildQueue.Count];
 		int pos = 0;
 		foreach(string unit in this.buildQueue) {
@@ -80,7 +85,75 @@ public class Building : WorldObject {
 
 	// --------------------------------------------------------------------------------------------
 	// Get current build percentage
-	public float getBuildPercentage() {
+	public float GetBuildPercentage() {
 		return this.currentBuildProgress / this.maxBuildProgress;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Override WorldObject SetSelection
+	public override void SetSelection(bool selected, Rect playingArea) {
+		base.SetSelection(selected, playingArea);
+		if(this.player) {
+			RallyPoint flag = this.player.GetComponentInChildren<RallyPoint>();
+			if(selected) {
+				if(flag && this.player.isHuman && this.spawnPoint != ResourceManager.InvalidPosition
+					&& this.rallyPoint != ResourceManager.InvalidPosition) {
+					flag.transform.localPosition = this.rallyPoint;
+					flag.transform.forward = this.transform.forward;
+					flag.Enable();
+				}
+			} else {
+				if(flag && this.player.isHuman)
+					flag.Disable();
+			}
+		}
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Returns if the building has a spawn point
+	public bool HasSpawnPoint() {
+		return this.spawnPoint != ResourceManager.InvalidPosition 
+			&& this.rallyPoint != ResourceManager.InvalidPosition;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Override WorldObject SetHoverState for the rally point
+	public override void SetHoverState(GameObject hoverObject) {
+		base.SetHoverState(hoverObject);
+		// only handle input if owned by a human player and currently selected
+		if(this.player && this.player.isHuman && this.currentlySelected) {
+			if(hoverObject.name == "Ground") {
+				if(this.player.hud.GetPreviousCursorState() == CursorState.RallyPoint)
+					this.player.hud.SetCursorState(CursorState.RallyPoint);
+			}
+		}
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Override WorldObject MouseClick for the rally point
+	public override void MouseClick(GameObject hitObject, Vector3 hitPoint, Player controller) {
+		base.MouseClick(hitObject, hitPoint, controller);
+		// only handle iput if owned by a human player and currently selected
+		if(this.player && this.player.isHuman && this.currentlySelected) {
+			if(hitObject.name == "Ground") {
+				if((this.player.hud.GetCursorState() == CursorState.RallyPoint 
+					|| player.hud.GetPreviousCursorState() == CursorState.RallyPoint) 
+					&& hitPoint != ResourceManager.InvalidPosition) {
+					this.SetRallyPoint(hitPoint);
+				}
+			}
+		}
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Place new rally point
+	public void SetRallyPoint(Vector3 position) {
+		this.rallyPoint = position;
+		if(this.player && this.player.isHuman && this.currentlySelected) {
+			RallyPoint flag = this.player.GetComponentInChildren<RallyPoint>();
+			if(flag) {
+				flag.transform.localPosition = this.rallyPoint;
+			}
+		}
 	}
 }

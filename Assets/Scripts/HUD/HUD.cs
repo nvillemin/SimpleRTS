@@ -14,13 +14,14 @@ public class HUD : MonoBehaviour {
 	// UNITY VARIABLES
 	public GUISkin resourcesSkin, ordersSkin, selectBoxSkin, mouseCursorSkin;
 	public Texture2D activeCursor, selectCursor, leftCursor, rightCursor, upCursor, downCursor,
-		buttonHover, buttonClick, buildFrame, buildMask;
+		buttonHover, buttonClick, buildFrame, buildMask, smallButtonHover, smallButtonClick,
+		rallyPointCursor;
 	public Texture2D[] moveCursors, attackCursors, harvestCursors, resources;
 
 	// --------------------------------------------------------------------------------------------
 	// PRIVATE VARIABLES
 	private Player player;
-	private CursorState activeCursorState;
+	private CursorState activeCursorState, previousCursorState;
 	private int currentFrame = 0, buildAreaHeight = 0;
 	private Dictionary<ResourceType, int> resourceValues, resourceLimits;
 	private Dictionary<ResourceType, Texture2D> resourceImages;
@@ -94,8 +95,9 @@ public class HUD : MonoBehaviour {
 
 				Building selectedBuilding = this.lastSelection.GetComponent<Building>();
 				if(selectedBuilding) {
-					this.DrawBuildQueue(selectedBuilding.getBuildQueueValues(),
-						selectedBuilding.getBuildPercentage());
+					this.DrawBuildQueue(selectedBuilding.GetBuildQueueValues(),
+						selectedBuilding.GetBuildPercentage());
+					this.DrawStandardBuildingOptions(selectedBuilding);
 				}
 			}
 		}
@@ -134,6 +136,31 @@ public class HUD : MonoBehaviour {
 		textLeft += TEXT_WIDTH;
 		this.DrawResourceIcon(ResourceType.Power, iconLeft, textLeft, topPos);
 		GUI.EndGroup();
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Draw building options for the current selected building
+	private void DrawStandardBuildingOptions(Building building) {
+		GUIStyle buttons = new GUIStyle();
+		buttons.hover.background = this.smallButtonHover;
+		buttons.active.background = this.smallButtonClick;
+		GUI.skin.button = buttons;
+		int leftPos = BUILD_IMAGE_WIDTH + SCROLL_BAR_WIDTH + BUTTON_SPACING;
+		int topPos = this.buildAreaHeight - BUILD_IMAGE_HEIGHT / 2;
+		int width = BUILD_IMAGE_WIDTH / 2;
+		int height = BUILD_IMAGE_HEIGHT / 2;
+		if(building.HasSpawnPoint()) {
+			if(GUI.Button(new Rect(leftPos, topPos, width, height), building.rallyPointImage)) {
+				if(this.activeCursorState != CursorState.RallyPoint 
+					&& this.previousCursorState != CursorState.RallyPoint) {
+					this.SetCursorState(CursorState.RallyPoint);
+				} else {
+					// dirty hack to ensure toggle works
+					this.SetCursorState(CursorState.PanRight);
+					this.SetCursorState(CursorState.Select);
+				}
+			}
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -208,6 +235,8 @@ public class HUD : MonoBehaviour {
 			leftPos = Screen.width - this.activeCursor.width;
 		} else if(this.activeCursorState == CursorState.PanDown) {
 			topPos = Screen.height - this.activeCursor.height;
+		} else if(this.activeCursorState == CursorState.RallyPoint) {
+			topPos -= this.activeCursor.height;
 		}
 
 		return new Rect(leftPos, topPos, this.activeCursor.width, this.activeCursor.height);
@@ -216,7 +245,10 @@ public class HUD : MonoBehaviour {
 	// --------------------------------------------------------------------------------------------
 	// Change cursor image
 	public void SetCursorState(CursorState newState) {
-		this.activeCursorState = newState;
+		if(this.activeCursorState != newState) {
+			this.previousCursorState = this.activeCursorState;
+			this.activeCursorState = newState;
+		}
 		switch(newState) {
 			case CursorState.Select:
 				this.activeCursor = this.selectCursor;
@@ -244,6 +276,9 @@ public class HUD : MonoBehaviour {
 				break;
 			case CursorState.PanDown:
 				this.activeCursor = this.downCursor;
+				break;
+			case CursorState.RallyPoint:
+				this.activeCursor = this.rallyPointCursor;
 				break;
 			default:
 				break;
@@ -318,5 +353,15 @@ public class HUD : MonoBehaviour {
 	private Rect GetScrollPos(int groupHeight) {
 		return new Rect(BUTTON_SPACING, BUTTON_SPACING, SCROLL_BAR_WIDTH, groupHeight - 2 
 			* BUTTON_SPACING);
+	}
+
+	// --------------------------------------------------------------------------------------------
+	public CursorState GetPreviousCursorState() {
+		return this.previousCursorState;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	public CursorState GetCursorState() {
+		return this.activeCursorState;
 	}
 }
