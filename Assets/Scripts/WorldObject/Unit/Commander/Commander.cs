@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Tank : Unit {
+public class Commander : Unit {
 	protected override void Start() {
 		base.Start();
 	}

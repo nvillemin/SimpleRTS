@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using RTS;
 using System.Collections.Generic;
+using System;
 
 public class HUD : MonoBehaviour {
 	// --------------------------------------------------------------------------------------------
@@ -39,15 +40,15 @@ public class HUD : MonoBehaviour {
 		resourceImages = new Dictionary<ResourceType, Texture2D>();
 		for(int i = 0; i < this.resources.Length; i++) {
 			switch(this.resources[i].name) {
-				case "Money":
-					resourceImages.Add(ResourceType.Money, this.resources[i]);
-					resourceValues.Add(ResourceType.Money, 0);
-					resourceLimits.Add(ResourceType.Money, 0);
+				case "Energy":
+					resourceImages.Add(ResourceType.Energy, this.resources[i]);
+					resourceValues.Add(ResourceType.Energy, 0);
+					resourceLimits.Add(ResourceType.Energy, 0);
 					break;
-				case "Power":
-					resourceImages.Add(ResourceType.Power, this.resources[i]);
-					resourceValues.Add(ResourceType.Power, 0);
-					resourceLimits.Add(ResourceType.Power, 0);
+				case "Metal":
+					resourceImages.Add(ResourceType.Metal, this.resources[i]);
+					resourceValues.Add(ResourceType.Metal, 0);
+					resourceLimits.Add(ResourceType.Metal, 0);
 					break;
 				default:
 					break;
@@ -131,10 +132,10 @@ public class HUD : MonoBehaviour {
 		GUI.BeginGroup(new Rect(0, 0, Screen.width, RESOURCE_BAR_HEIGHT));
 		GUI.Box(new Rect(0, 0, Screen.width, RESOURCE_BAR_HEIGHT), "");
 		int topPos = 4, iconLeft = 4, textLeft = 20;
-		this.DrawResourceIcon(ResourceType.Money, iconLeft, textLeft, topPos);
+		this.DrawResourceIcon(ResourceType.Energy, iconLeft, textLeft, topPos);
 		iconLeft += TEXT_WIDTH;
 		textLeft += TEXT_WIDTH;
-		this.DrawResourceIcon(ResourceType.Power, iconLeft, textLeft, topPos);
+		this.DrawResourceIcon(ResourceType.Metal, iconLeft, textLeft, topPos);
 		GUI.EndGroup();
 	}
 
@@ -298,8 +299,10 @@ public class HUD : MonoBehaviour {
 
 	// --------------------------------------------------------------------------------------------
 	// Update the resource values
-	public void SetResourceValues(Dictionary<ResourceType, int> resourceValues, Dictionary<ResourceType, int> resourceLimits) {
-		this.resourceValues = resourceValues;
+	public void SetResourceValues(Dictionary<ResourceType, float> resourceValues, Dictionary<ResourceType, int> resourceLimits) {
+		foreach(ResourceType resource in resourceValues.Keys) {
+			this.resourceValues[resource] = (int)Math.Floor(resourceValues[resource]);
+		}
 		this.resourceLimits = resourceLimits;
 	}
 

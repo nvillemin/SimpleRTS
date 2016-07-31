@@ -11,17 +11,18 @@ public class Player : MonoBehaviour {
 	public WorldObject SelectedObject { get; set; }
 	public string username;
     public bool isHuman;
-	public int startMoney, startMoneyLimit, startPower, startPowerLimit;
+	public int startEnergy, startEnergyLimit, startMetal, startMetalLimit;
 
 	// --------------------------------------------------------------------------------------------
 	// PRIVATE VARIABLES
-	private Dictionary<ResourceType, int> resources, resourceLimits;
+	private Dictionary<ResourceType, float> resources;
+	private Dictionary<ResourceType, int> resourceLimits;
 
 	// --------------------------------------------------------------------------------------------
 	// Initialization
 	void Awake() {
-		this.resources = this.InitResourceList();
-		this.resourceLimits = this.InitResourceList();
+		this.resources = this.InitResourceValues();
+		this.resourceLimits = this.InitResourceLimits();
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -41,32 +42,44 @@ public class Player : MonoBehaviour {
 	}
 
 	// --------------------------------------------------------------------------------------------
-	// Resources initialization
-	private Dictionary<ResourceType, int> InitResourceList() {
+	// Resource values initialization
+	private Dictionary<ResourceType, float> InitResourceValues() {
+		Dictionary<ResourceType, float> list = new Dictionary<ResourceType, float>();
+		list.Add(ResourceType.Energy, 0.0f);
+		list.Add(ResourceType.Metal, 0.0f);
+		return list;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Resource limits initialization
+	private Dictionary<ResourceType, int> InitResourceLimits() {
 		Dictionary<ResourceType, int> list = new Dictionary<ResourceType, int>();
-		list.Add(ResourceType.Money, 0);
-		list.Add(ResourceType.Power, 0);
+		list.Add(ResourceType.Energy, 0);
+		list.Add(ResourceType.Metal, 0);
 		return list;
 	}
 
 	// --------------------------------------------------------------------------------------------
 	// Resource limits initialization
 	private void AddStartResourceLimits() {
-		this.IncrementResourceLimit(ResourceType.Money, this.startMoneyLimit);
-		this.IncrementResourceLimit(ResourceType.Power, this.startPowerLimit);
+		this.IncrementResourceLimit(ResourceType.Energy, this.startEnergyLimit);
+		this.IncrementResourceLimit(ResourceType.Metal, this.startMetalLimit);
 	}
 
 	// --------------------------------------------------------------------------------------------
 	// Start resources initialization
 	private void AddStartResources() {
-		this.AddResource(ResourceType.Money, this.startMoney);
-		this.AddResource(ResourceType.Power, this.startPower);
+		this.AddResource(ResourceType.Energy, this.startEnergy);
+		this.AddResource(ResourceType.Metal, this.startMetal);
 	}
 
 	// --------------------------------------------------------------------------------------------
 	// Add resource by type
-	public void AddResource(ResourceType type, int amount) {
+	public void AddResource(ResourceType type, float amount) {
 		this.resources[type] += amount;
+		if(this.resources[type] > this.resourceLimits[type]) {
+			this.resources[type] = this.resourceLimits[type];
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------

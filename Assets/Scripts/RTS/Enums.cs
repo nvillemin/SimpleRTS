@@ -6,5 +6,5 @@ namespace RTS {
 	public enum CursorState { Select, Move, Attack, PanLeft, PanRight, PanUp, PanDown, Harvest, RallyPoint }
 
 	// All resource types
-	public enum ResourceType { Money, Power }
+	public enum ResourceType { Energy, Metal }
 }

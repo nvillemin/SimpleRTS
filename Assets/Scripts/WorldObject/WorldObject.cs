@@ -8,7 +8,8 @@ public class WorldObject : MonoBehaviour {
 	// UNITY VARIABLES
 	public string objectName;
 	public Texture2D buildImage;
-	public int cost, sellValue, hitPoints, maxHitPoints;
+	public int energyBuildCost, energyProd, energyCost, metalBuildCost, metalProd, metalCost, 
+		sellValue, hitPoints, maxHitPoints;
 
 	// --------------------------------------------------------------------------------------------
 	// PROTECTED VARIABLES
@@ -31,7 +32,12 @@ public class WorldObject : MonoBehaviour {
 
 	// --------------------------------------------------------------------------------------------
 	protected virtual void Update() {
-
+		if(this.player) {
+			this.player.AddResource(ResourceType.Energy, (this.energyProd - this.energyCost)
+				* Time.deltaTime);
+			this.player.AddResource(ResourceType.Metal, (this.metalProd - this.metalCost)
+				* Time.deltaTime);
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------

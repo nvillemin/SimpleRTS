@@ -2,5 +2,5 @@
 using System.Collections;
 
 public class Units : MonoBehaviour {
-	// wrapper class for unit listing for a player
+	// Wrapper class for unit listing for a player
 }

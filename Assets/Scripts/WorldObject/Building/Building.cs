@@ -161,7 +161,7 @@ public class Building : WorldObject {
 	// Sell this building
 	public void Sell() {
 		if(this.player) {
-			this.player.AddResource(ResourceType.Money, this.sellValue);
+			this.player.AddResource(ResourceType.Energy, this.sellValue);
 		}
 		if(this.currentlySelected) {
 			this.SetSelection(false, this.playingArea);
