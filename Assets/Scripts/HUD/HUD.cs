@@ -149,7 +149,11 @@ public class HUD : MonoBehaviour {
 		int topPos = this.buildAreaHeight - BUILD_IMAGE_HEIGHT / 2;
 		int width = BUILD_IMAGE_WIDTH / 2;
 		int height = BUILD_IMAGE_HEIGHT / 2;
+		if(GUI.Button(new Rect(leftPos, topPos, width, height), building.sellImage)) {
+			building.Sell();
+		}
 		if(building.HasSpawnPoint()) {
+			leftPos += width + BUTTON_SPACING;
 			if(GUI.Button(new Rect(leftPos, topPos, width, height), building.rallyPointImage)) {
 				if(this.activeCursorState != CursorState.RallyPoint 
 					&& this.previousCursorState != CursorState.RallyPoint) {

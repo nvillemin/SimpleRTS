@@ -8,7 +8,7 @@ public class Building : WorldObject {
 	// --------------------------------------------------------------------------------------------
 	// UNITY VARIABLES
 	public float maxBuildProgress;
-	public Texture2D rallyPointImage;
+	public Texture2D rallyPointImage, sellImage;
 
 	// --------------------------------------------------------------------------------------------
 	// PROTECTED VARIABLES
@@ -155,5 +155,17 @@ public class Building : WorldObject {
 				flag.transform.localPosition = this.rallyPoint;
 			}
 		}
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Sell this building
+	public void Sell() {
+		if(this.player) {
+			this.player.AddResource(ResourceType.Money, this.sellValue);
+		}
+		if(this.currentlySelected) {
+			this.SetSelection(false, this.playingArea);
+		}
+		Destroy(this.gameObject);
 	}
 }
