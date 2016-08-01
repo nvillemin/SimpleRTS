@@ -24,8 +24,11 @@ namespace RTS {
 		public static Bounds InvalidBounds { get { return invalidBounds; } }
 		private static GUISkin selectBoxSkin;
 		public static GUISkin SelectBoxSkin { get { return selectBoxSkin; } }
-		public static void StoreSelectBoxItems(GUISkin skin) {
+		public static void StoreSelectBoxItems(GUISkin skin, Texture2D healthy, Texture2D damaged, Texture2D critical) {
 			selectBoxSkin = skin;
+			healthyTexture = healthy;
+			damagedTexture = damaged;
+			criticalTexture = critical;
 		}
 
 		// --------------------------------------------------------------------------------------------
@@ -41,5 +44,12 @@ namespace RTS {
 		public static GameObject GetWorldObject(string name) { return gameObjectList.GetWorldObject(name); }
 		public static GameObject GetPlayerObject() { return gameObjectList.GetPlayerObject(); }
 		public static Texture2D GetBuildImage(string name) { return gameObjectList.GetBuildImage(name); }
+
+		// --------------------------------------------------------------------------------------------
+		// Health bar
+		private static Texture2D healthyTexture, damagedTexture, criticalTexture;
+		public static Texture2D HealthyTexture { get { return healthyTexture; } }
+		public static Texture2D DamagedTexture { get { return damagedTexture; } }
+		public static Texture2D CriticalTexture { get { return criticalTexture; } }
 	}
 }

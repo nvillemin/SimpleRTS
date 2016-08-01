@@ -16,7 +16,7 @@ public class HUD : MonoBehaviour {
 	public GUISkin resourcesSkin, ordersSkin, selectBoxSkin, mouseCursorSkin;
 	public Texture2D activeCursor, selectCursor, leftCursor, rightCursor, upCursor, downCursor,
 		buttonHover, buttonClick, buildFrame, buildMask, smallButtonHover, smallButtonClick,
-		rallyPointCursor;
+		rallyPointCursor, healthHealthy, healthDamaged, healthCritical;
 	public Texture2D[] moveCursors, attackCursors, harvestCursors, resources;
 
 	// --------------------------------------------------------------------------------------------
@@ -33,22 +33,23 @@ public class HUD : MonoBehaviour {
 	// Initialization
 	void Start() {
 		this.player = this.transform.root.GetComponent<Player>();
-		ResourceManager.StoreSelectBoxItems(this.selectBoxSkin);
+		ResourceManager.StoreSelectBoxItems(selectBoxSkin, this.healthHealthy, this.healthDamaged,
+			this.healthCritical);
 		this.SetCursorState(CursorState.Select);
 		this.resourceValues = new Dictionary<ResourceType, int>();
 		this.resourceLimits = new Dictionary<ResourceType, int>();
-		resourceImages = new Dictionary<ResourceType, Texture2D>();
+		this.resourceImages = new Dictionary<ResourceType, Texture2D>();
 		for(int i = 0; i < this.resources.Length; i++) {
 			switch(this.resources[i].name) {
 				case "Energy":
-					resourceImages.Add(ResourceType.Energy, this.resources[i]);
-					resourceValues.Add(ResourceType.Energy, 0);
-					resourceLimits.Add(ResourceType.Energy, 0);
+					this.resourceImages.Add(ResourceType.Energy, this.resources[i]);
+					this.resourceValues.Add(ResourceType.Energy, 0);
+					this.resourceLimits.Add(ResourceType.Energy, 0);
 					break;
 				case "Metal":
-					resourceImages.Add(ResourceType.Metal, this.resources[i]);
-					resourceValues.Add(ResourceType.Metal, 0);
-					resourceLimits.Add(ResourceType.Metal, 0);
+					this.resourceImages.Add(ResourceType.Metal, this.resources[i]);
+					this.resourceValues.Add(ResourceType.Metal, 0);
+					this.resourceLimits.Add(ResourceType.Metal, 0);
 					break;
 				default:
 					break;

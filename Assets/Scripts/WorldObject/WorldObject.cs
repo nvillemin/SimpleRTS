@@ -18,6 +18,8 @@ public class WorldObject : MonoBehaviour {
 	protected bool currentlySelected = false;
 	protected Bounds selectionBounds;
 	protected Rect playingArea = new Rect(0.0f, 0.0f, 0.0f, 0.0f);
+	protected GUIStyle healthStyle = new GUIStyle();
+	protected float healthPercentage = 1.0f;
 
 	// --------------------------------------------------------------------------------------------
 	protected virtual void Awake() {
@@ -66,8 +68,25 @@ public class WorldObject : MonoBehaviour {
 	}
 
 	// --------------------------------------------------------------------------------------------
+	// Draw the selection box around the object when it's selected
 	protected virtual void DrawSelectionBox(Rect selectBox) {
 		GUI.Box(selectBox, "");
+		this.CalculateCurrentHealth();
+		GUI.Label(new Rect(selectBox.x, selectBox.y - 7, selectBox.width * this.healthPercentage, 
+			5), "", this.healthStyle);
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Change the way the health is displayed according to the percentage left
+	protected virtual void CalculateCurrentHealth() {
+		this.healthPercentage = (float)hitPoints / (float)maxHitPoints;
+		if(this.healthPercentage > 0.65f) {
+			this.healthStyle.normal.background = ResourceManager.HealthyTexture;
+		} else if(this.healthPercentage > 0.30f) {
+			this.healthStyle.normal.background = ResourceManager.DamagedTexture;
+		} else {
+			this.healthStyle.normal.background = ResourceManager.CriticalTexture;
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------
