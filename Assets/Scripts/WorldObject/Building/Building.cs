@@ -26,12 +26,7 @@ public class Building : WorldObject {
 	protected override void Awake() {
 		base.Awake();
 		this.buildQueue = new Queue<string>();
-		float spawnX = this.selectionBounds.center.x + this.transform.forward.x 
-			* this.selectionBounds.extents.x + this.transform.forward.x * 10;
-		float spawnZ = this.selectionBounds.center.z + this.transform.forward.z 
-			+ this.selectionBounds.extents.z + this.transform.forward.z * 10;
-		this.spawnPoint = new Vector3(spawnX, 0.0f, spawnZ);
-		this.rallyPoint = this.spawnPoint;
+		this.InitializeSpawnPoint();
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -53,6 +48,16 @@ public class Building : WorldObject {
 		if(this.needsBuilding) {
 			this.DrawBuildProgress();
 		}
+	}
+
+	// --------------------------------------------------------------------------------------------
+	private void InitializeSpawnPoint() {
+		float spawnX = this.selectionBounds.center.x + this.transform.forward.x
+			* this.selectionBounds.extents.x + this.transform.forward.x * 10;
+		float spawnZ = this.selectionBounds.center.z + this.transform.forward.z
+			+ this.selectionBounds.extents.z + this.transform.forward.z * 10;
+		this.spawnPoint = new Vector3(spawnX, 0.0f, spawnZ);
+		this.rallyPoint = this.spawnPoint;
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -207,6 +212,7 @@ public class Building : WorldObject {
 			this.hitPoints = this.maxHitPoints;
 			this.needsBuilding = false;
 			this.RestoreMaterials();
+			this.InitializeSpawnPoint();
 		}
 	}
 }
