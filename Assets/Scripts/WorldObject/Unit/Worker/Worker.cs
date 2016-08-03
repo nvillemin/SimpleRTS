@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using RTS;
 
 public class Worker : Unit {
 	// --------------------------------------------------------------------------------------------
@@ -51,9 +52,10 @@ public class Worker : Unit {
 	// Starts performing a worker action
 	public override void PerformAction(string actionToPerform) {
 		base.PerformAction(actionToPerform);
-		if(!this.player.IsFindingBuildingLocation()) {
-			this.CreateBuilding(actionToPerform);
+		if(this.player.IsFindingBuildingLocation()) {
+			this.player.CancelBuildingPlacement();
 		}
+		this.CreateBuilding(actionToPerform);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -68,8 +70,7 @@ public class Worker : Unit {
 	// Create a new building
 	private void CreateBuilding(string buildingName) {
 		if(this.player) {
-			Vector3 buildPoint = new Vector3(transform.position.x, transform.position.y, 
-				transform.position.z + 10);
+			Vector3 buildPoint = ResourceManager.InvalidPosition;
 			this.player.CreateBuilding(buildingName, buildPoint, this, playingArea);
 		}
 	}
