@@ -16,7 +16,7 @@ public class WorldObject : MonoBehaviour {
 	// PROTECTED VARIABLES
 	protected Player player;
 	protected string[] actions = {};
-	protected bool currentlySelected = false;
+	protected bool currentlySelected = false, needsBuilding = false;
 	protected Bounds selectionBounds;
 	protected Rect playingArea = new Rect(0.0f, 0.0f, 0.0f, 0.0f);
 	protected GUIStyle healthStyle = new GUIStyle();
@@ -205,5 +205,10 @@ public class WorldObject : MonoBehaviour {
 	// --------------------------------------------------------------------------------------------
 	public Bounds GetSelectionBounds() {
 		return this.selectionBounds;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	public bool NeedsBuilding() {
+		return this.needsBuilding;
 	}
 }

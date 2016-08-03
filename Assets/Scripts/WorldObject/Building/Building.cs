@@ -19,8 +19,7 @@ public class Building : WorldObject {
 	// PRIVATE VARIABLES
 	private float currentBuildProgress = 0.0f;
 	private Vector3 spawnPoint;
-	private bool needsBuilding = false;
-
+	
 	// --------------------------------------------------------------------------------------------
 	// Initialization (before Start)
 	protected override void Awake() {

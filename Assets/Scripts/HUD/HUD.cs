@@ -86,7 +86,7 @@ public class HUD : MonoBehaviour {
 				GUI.Label(new Rect(leftPos, topPos, ORDERS_BAR_WIDTH, SELECTION_NAME_HEIGHT),
 					selectionName);
 			}
-			if(this.player.SelectedObject.IsOwnedBy(player)) {
+			if(this.player.SelectedObject.IsOwnedBy(player) && !this.player.SelectedObject.NeedsBuilding()) {
 				// reset slider value if the selected object has changed
 				if(this.lastSelection && this.lastSelection != this.player.SelectedObject) {
 					this.sliderValue = 0.0f;
@@ -96,7 +96,7 @@ public class HUD : MonoBehaviour {
 				this.lastSelection = this.player.SelectedObject;
 
 				Building selectedBuilding = this.lastSelection.GetComponent<Building>();
-				if(selectedBuilding) {
+				if(selectedBuilding && !selectedBuilding.NeedsBuilding()) {
 					this.DrawBuildQueue(selectedBuilding.GetBuildQueueValues(),
 						selectedBuilding.GetBuildPercentage());
 					this.DrawStandardBuildingOptions(selectedBuilding);
