@@ -19,6 +19,7 @@ public class Building : WorldObject {
 	// PRIVATE VARIABLES
 	private float currentBuildProgress = 0.0f;
 	private Vector3 spawnPoint;
+	private bool needsBuilding = false;
 
 	// --------------------------------------------------------------------------------------------
 	// Initialization (before Start)
@@ -49,6 +50,21 @@ public class Building : WorldObject {
 	// --------------------------------------------------------------------------------------------
 	protected override void OnGUI() {
 		base.OnGUI();
+		if(this.needsBuilding) {
+			this.DrawBuildProgress();
+		}
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Draw the current build progress
+	private void DrawBuildProgress() {
+		GUI.skin = ResourceManager.SelectBoxSkin;
+		Rect selectBox = WorkManager.CalculateSelectionBox(selectionBounds, playingArea);
+		// Draw the selection box around the currently selected object, within the bounds
+		GUI.BeginGroup(playingArea);
+		this.CalculateCurrentHealth(0.5f, 0.99f);
+		this.DrawHealthBar(selectBox, "Building ...");
+		GUI.EndGroup();
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -65,7 +81,7 @@ public class Building : WorldObject {
 			if(this.currentBuildProgress > this.maxBuildProgress) {
 				if(this.player) {
 					this.player.AddUnit(this.buildQueue.Dequeue(), this.spawnPoint, 
-						this.rallyPoint, this.transform.rotation);
+						this.rallyPoint, this.transform.rotation, this);
 				}
 				this.currentBuildProgress = 0.0f;
 			}
@@ -167,5 +183,30 @@ public class Building : WorldObject {
 			this.SetSelection(false, this.playingArea);
 		}
 		Destroy(this.gameObject);
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Starts the construction of this building
+	public void StartConstruction() {
+		this.CalculateBounds();
+		this.needsBuilding = true;
+		this.hitPoints = 0;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Returns if the building is currently under construction
+	public bool UnderConstruction() {
+		return this.needsBuilding;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Construct the building
+	public void Construct(int amount) {
+		this.hitPoints += amount;
+		if(this.hitPoints >= this.maxHitPoints) {
+			this.hitPoints = this.maxHitPoints;
+			this.needsBuilding = false;
+			this.RestoreMaterials();
+		}
 	}
 }

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Commander : Unit {
+public class Commander : Worker {
 	protected override void Start() {
 		base.Start();
 	}

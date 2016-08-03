@@ -2,6 +2,7 @@
 using System.Collections;
 using System;
 using RTS;
+using System.Collections.Generic;
 
 public class WorldObject : MonoBehaviour {
 	// --------------------------------------------------------------------------------------------
@@ -22,6 +23,10 @@ public class WorldObject : MonoBehaviour {
 	protected float healthPercentage = 1.0f;
 
 	// --------------------------------------------------------------------------------------------
+	// PRIVATE VARIABLES
+	private List<Material> oldMaterials = new List<Material>();
+
+	// --------------------------------------------------------------------------------------------
 	protected virtual void Awake() {
 		this.selectionBounds = ResourceManager.InvalidBounds;
 		CalculateBounds();
@@ -29,7 +34,7 @@ public class WorldObject : MonoBehaviour {
 
 	// --------------------------------------------------------------------------------------------
 	protected virtual void Start() {
-		this.player = this.transform.root.GetComponentInChildren<Player>();
+		this.SetPlayer();
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -50,6 +55,11 @@ public class WorldObject : MonoBehaviour {
 	}
 
 	// --------------------------------------------------------------------------------------------
+	public void SetPlayer() {
+		player = transform.root.GetComponentInChildren<Player>();
+	}
+
+	// --------------------------------------------------------------------------------------------
 	public void CalculateBounds() {
 		this.selectionBounds = new Bounds(transform.position, Vector3.zero);
 		foreach(Renderer r in GetComponentsInChildren<Renderer>()) {
@@ -60,9 +70,9 @@ public class WorldObject : MonoBehaviour {
 	// --------------------------------------------------------------------------------------------
 	private void DrawSelection() {
 		GUI.skin = ResourceManager.SelectBoxSkin;
-		Rect selectBox = WorkManager.CalculateSelectionBox(selectionBounds, playingArea);
+		Rect selectBox = WorkManager.CalculateSelectionBox(this.selectionBounds, this.playingArea);
 		// Draw the selection box around the currently selected object
-		GUI.BeginGroup(playingArea);
+		GUI.BeginGroup(this.playingArea);
 		this.DrawSelectionBox(selectBox);
 		GUI.EndGroup();
 	}
@@ -71,22 +81,30 @@ public class WorldObject : MonoBehaviour {
 	// Draw the selection box around the object when it's selected
 	protected virtual void DrawSelectionBox(Rect selectBox) {
 		GUI.Box(selectBox, "");
-		this.CalculateCurrentHealth();
-		GUI.Label(new Rect(selectBox.x, selectBox.y - 7, selectBox.width * this.healthPercentage, 
-			5), "", this.healthStyle);
+		this.CalculateCurrentHealth(0.35f, 0.65f);
+		this.DrawHealthBar(selectBox, "");
 	}
 
 	// --------------------------------------------------------------------------------------------
 	// Change the way the health is displayed according to the percentage left
-	protected virtual void CalculateCurrentHealth() {
+	protected virtual void CalculateCurrentHealth(float lowSplit, float highSplit) {
 		this.healthPercentage = (float)hitPoints / (float)maxHitPoints;
-		if(this.healthPercentage > 0.65f) {
-			this.healthStyle.normal.background = ResourceManager.HealthyTexture;
-		} else if(this.healthPercentage > 0.30f) {
-			this.healthStyle.normal.background = ResourceManager.DamagedTexture;
+		if(this.healthPercentage > highSplit) {
+			healthStyle.normal.background = ResourceManager.HealthyTexture;
+		} else if(this.healthPercentage > lowSplit) {
+			healthStyle.normal.background = ResourceManager.DamagedTexture;
 		} else {
-			this.healthStyle.normal.background = ResourceManager.CriticalTexture;
+			healthStyle.normal.background = ResourceManager.CriticalTexture;
 		}
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Draw the health bar of the object according to the health percentage
+	protected void DrawHealthBar(Rect selectBox, string label) {
+		this.healthStyle.padding.top = -20;
+		this.healthStyle.fontStyle = FontStyle.Bold;
+		GUI.Label(new Rect(selectBox.x, selectBox.y - 7, selectBox.width * this.healthPercentage, 5),
+			label, this.healthStyle);
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -142,5 +160,50 @@ public class WorldObject : MonoBehaviour {
 	// --------------------------------------------------------------------------------------------
 	public bool IsOwnedBy(Player owner) {
 		return player && player.Equals(owner);
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Enable or disable colliders
+	public void SetColliders(bool enabled) {
+		Collider[] colliders = GetComponentsInChildren<Collider>();
+		foreach(Collider collider in colliders) {
+			collider.enabled = enabled;
+		}
+	}
+
+	// --------------------------------------------------------------------------------------------
+	public void SetTransparentMaterial(Material material, bool storeExistingMaterial) {
+		if(storeExistingMaterial) {
+			this.oldMaterials.Clear();
+		}
+		Component[] components = GetComponentsInChildren(typeof(Renderer));
+		foreach(Component comp in components) {
+			Renderer renderer = (Renderer)comp;
+			if(storeExistingMaterial) {
+				this.oldMaterials.Add(renderer.material);
+			}
+			renderer.material = material;
+		}
+	}
+
+	// --------------------------------------------------------------------------------------------
+	public void RestoreMaterials() {
+		Component[] components = GetComponentsInChildren(typeof(Renderer));
+		if(this.oldMaterials.Count == components.Length) {
+			for(int i = 0; i < components.Length; i++) {
+				Renderer renderer = (Renderer)components[i];
+				renderer.material = this.oldMaterials[i];
+			}
+		}
+	}
+
+	// --------------------------------------------------------------------------------------------
+	public void SetPlayingArea(Rect playingArea) {
+		this.playingArea = playingArea;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	public Bounds GetSelectionBounds() {
+		return this.selectionBounds;
 	}
 }

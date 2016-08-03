@@ -199,12 +199,14 @@ public class HUD : MonoBehaviour {
 			Cursor.visible = true;
 		} else {
 			Cursor.visible = false;
-			GUI.skin = this.mouseCursorSkin;
-			GUI.BeginGroup(new Rect(0, 0, Screen.width, Screen.height));
-			this.UpdateCursorAnimation();
-			Rect cursorPosition = this.GetCursorDrawPosition();
-			GUI.Label(cursorPosition, this.activeCursor);
-			GUI.EndGroup();
+			if(!this.player.IsFindingBuildingLocation()) {
+				GUI.skin = this.mouseCursorSkin;
+				GUI.BeginGroup(new Rect(0, 0, Screen.width, Screen.height));
+				this.UpdateCursorAnimation();
+				Rect cursorPosition = this.GetCursorDrawPosition();
+				GUI.Label(cursorPosition, this.activeCursor);
+				GUI.EndGroup();
+			}
 		}
 	}
 

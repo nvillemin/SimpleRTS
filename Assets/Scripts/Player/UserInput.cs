@@ -116,18 +116,23 @@ public class UserInput : MonoBehaviour {
 	// --------------------------------------------------------------------------------------------
 	// Used to change the cursor when hovering a selectable object
 	private void MouseHover() {
-		if(player.hud.MouseInBounds()) {
-			GameObject hoverObject = FindHitObject();
-			if(hoverObject) {
-				if(player.SelectedObject)
-					player.SelectedObject.SetHoverState(hoverObject);
-				else if(hoverObject.name != "Ground") {
-					Player owner = hoverObject.transform.root.GetComponent<Player>();
-					if(owner) {
-						Unit unit = hoverObject.transform.parent.GetComponent<Unit>();
-						Building building = hoverObject.transform.parent.GetComponent<Building>();
-						if(owner.username == player.username && (unit || building))
-							player.hud.SetCursorState(CursorState.Select);
+		if(this.player.hud.MouseInBounds()) {
+			if(this.player.IsFindingBuildingLocation()) {
+				this.player.FindBuildingLocation();
+			} else {
+				GameObject hoverObject = FindHitObject();
+				if(hoverObject) {
+					if(this.player.SelectedObject)
+						this.player.SelectedObject.SetHoverState(hoverObject);
+					else if(hoverObject.name != "Ground") {
+						Player owner = hoverObject.transform.root.GetComponent<Player>();
+						if(owner) {
+							Unit unit = hoverObject.transform.parent.GetComponent<Unit>();
+							Building building = hoverObject.transform.parent.GetComponent<Building>();
+							if(owner.username == this.player.username && (unit || building)) {
+								this.player.hud.SetCursorState(CursorState.Select);
+							}
+						}
 					}
 				}
 			}
@@ -138,30 +143,42 @@ public class UserInput : MonoBehaviour {
 	// Triggered when the left mouse button is clicked
 	private void LeftMouseClick() {
 		if(this.player.hud.MouseInBounds()) {
-			GameObject hitObject = FindHitObject();
-			Vector3 hitPoint = FindHitPoint();
-			if(hitObject && hitPoint != ResourceManager.InvalidPosition) {
-				if(this.player.SelectedObject) {
-					this.player.SelectedObject.MouseClick(hitObject, hitPoint, this.player);
-				} else if(hitObject.name != "Ground") {
-					WorldObject worldObject = hitObject.transform.parent
-						.GetComponent<WorldObject>();
-					if(worldObject) {
-						// we already know the player has no selected object
-						this.player.SelectedObject = worldObject;
-						worldObject.SetSelection(true, player.hud.GetPlayingArea());
+			if(player.IsFindingBuildingLocation()) {
+				if(player.CanPlaceBuilding()) {
+					this.player.StartConstruction();
+				}
+			} else {
+				GameObject hitObject = FindHitObject();
+				Vector3 hitPoint = FindHitPoint();
+				if(hitObject && hitPoint != ResourceManager.InvalidPosition) {
+					if(this.player.SelectedObject) {
+						this.player.SelectedObject.MouseClick(hitObject, hitPoint, this.player);
+					} else if(hitObject.name != "Ground") {
+						WorldObject worldObject = hitObject.transform.parent
+							.GetComponent<WorldObject>();
+						if(worldObject) {
+							// we already know the player has no selected object
+							this.player.SelectedObject = worldObject;
+							worldObject.SetSelection(true, player.hud.GetPlayingArea());
+						}
 					}
 				}
 			}
+			
 		}
 	}
 
 	// --------------------------------------------------------------------------------------------
 	// Triggered when the right mouse button is clicked
 	private void RightMouseClick() {
-		if(player.hud.MouseInBounds() && !Input.GetKey(KeyCode.LeftAlt) && player.SelectedObject) {
-			player.SelectedObject.SetSelection(false, player.hud.GetPlayingArea());
-			player.SelectedObject = null;
+		if(this.player.hud.MouseInBounds() && !Input.GetKey(KeyCode.LeftAlt) 
+			&& this.player.SelectedObject) {
+			if(this.player.IsFindingBuildingLocation()) {
+				this.player.CancelBuildingPlacement();
+			} else {
+				this.player.SelectedObject.SetSelection(false, this.player.hud.GetPlayingArea());
+				this.player.SelectedObject = null;
+			}
 		}
 	}
 

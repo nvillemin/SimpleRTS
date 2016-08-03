@@ -15,6 +15,7 @@ public class Unit : WorldObject {
 	// PRIVATE VARIABLES
 	private Vector3 destination;
 	private Quaternion targetRotation;
+	private Building creator;
 
 	/*** Game Engine methods, all can be overridden by subclass ***/
 	// --------------------------------------------------------------------------------------------
@@ -72,7 +73,7 @@ public class Unit : WorldObject {
 
 	// --------------------------------------------------------------------------------------------
 	// Starts the moving command, rotating first
-	public void StartMove(Vector3 destination) {
+	public virtual void StartMove(Vector3 destination) {
 		this.destination = destination;
 		this.targetRotation = Quaternion.LookRotation(destination - this.transform.position);
 		this.rotating = true;
@@ -105,5 +106,11 @@ public class Unit : WorldObject {
 			this.moving = false;
 		}
 		this.CalculateBounds();
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Set the creator of this unit
+	public virtual void SetBuilding(Building creator) {
+		this.creator = creator;
 	}
 }
