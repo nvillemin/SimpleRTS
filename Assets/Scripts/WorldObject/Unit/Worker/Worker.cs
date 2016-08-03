@@ -51,7 +51,9 @@ public class Worker : Unit {
 	// Starts performing a worker action
 	public override void PerformAction(string actionToPerform) {
 		base.PerformAction(actionToPerform);
-		this.CreateBuilding(actionToPerform);
+		if(!this.player.IsFindingBuildingLocation()) {
+			this.CreateBuilding(actionToPerform);
+		}
 	}
 
 	// --------------------------------------------------------------------------------------------

@@ -331,8 +331,9 @@ public class HUD : MonoBehaviour {
 			if(action) {
 				// create the button and handle the click of that button
 				if(GUI.Button(pos, action)) {
-					if(this.player.SelectedObject)
+					if(this.player.SelectedObject) {
 						this.player.SelectedObject.PerformAction(actions[i]);
+					}
 				}
 			}
 		}
