@@ -7,17 +7,17 @@ public class HUD : MonoBehaviour {
 	// --------------------------------------------------------------------------------------------
 	// CONSTANTS
 	private const int ORDERS_BAR_WIDTH = 150, RESOURCE_BAR_HEIGHT = 40, SELECTION_NAME_HEIGHT = 15,
-		ICON_WIDTH = 32, ICON_HEIGHT = 32, TEXT_WIDTH = 128, TEXT_HEIGHT = 32, 
-		BUILD_IMAGE_WIDTH = 64, BUILD_IMAGE_HEIGHT = 64, BUTTON_SPACING = 7, SCROLL_BAR_WIDTH = 22,
-		BUILD_IMAGE_PADDING = 8;
+		ICON_WIDTH = 32, ICON_HEIGHT = 32, ICON_TOP = 4, RESOURCE_WIDTH = 256, RESOURCE_HEIGHT = 8, 
+		RESOURCE_SPACE = 16, TEXT_HEIGHT = 16, BUILD_IMAGE_WIDTH = 64, BUILD_IMAGE_HEIGHT = 64, 
+		BUTTON_SPACING = 7, SCROLL_BAR_WIDTH = 22, BUILD_IMAGE_PADDING = 8;
 
 	// --------------------------------------------------------------------------------------------
 	// UNITY VARIABLES
 	public GUISkin resourcesSkin, ordersSkin, selectBoxSkin, mouseCursorSkin;
 	public Texture2D activeCursor, selectCursor, leftCursor, rightCursor, upCursor, downCursor,
 		buttonHover, buttonClick, buildFrame, buildMask, smallButtonHover, smallButtonClick,
-		rallyPointCursor, healthHealthy, healthDamaged, healthCritical;
-	public Texture2D[] moveCursors, attackCursors, harvestCursors, resources;
+		rallyPointCursor, healthHealthy, healthDamaged, healthCritical, energyBar, metalBar;
+	public Texture2D[] moveCursors, attackCursors, harvestCursors, resourceLogos, resourceBars;
 
 	// --------------------------------------------------------------------------------------------
 	// PRIVATE VARIABLES
@@ -26,8 +26,10 @@ public class HUD : MonoBehaviour {
 	private int currentFrame = 0, buildAreaHeight = 0;
 	private Dictionary<ResourceType, int> resourceValues, resourceLimits;
 	private Dictionary<ResourceType, Texture2D> resourceImages;
+	private Dictionary<ResourceType, Texture2D> resourceBarImages;
 	private WorldObject lastSelection;
 	private float sliderValue;
+	private GUIStyle resourceBar = new GUIStyle();
 
 	// --------------------------------------------------------------------------------------------
 	// Initialization
@@ -39,15 +41,18 @@ public class HUD : MonoBehaviour {
 		this.resourceValues = new Dictionary<ResourceType, int>();
 		this.resourceLimits = new Dictionary<ResourceType, int>();
 		this.resourceImages = new Dictionary<ResourceType, Texture2D>();
-		for(int i = 0; i < this.resources.Length; i++) {
-			switch(this.resources[i].name) {
+		this.resourceBarImages = new Dictionary<ResourceType, Texture2D>();
+		for(int i = 0; i < this.resourceLogos.Length; i++) {
+			switch(this.resourceLogos[i].name) {
 				case "Energy":
-					this.resourceImages.Add(ResourceType.Energy, this.resources[i]);
+					this.resourceImages.Add(ResourceType.Energy, this.resourceLogos[i]);
+					this.resourceBarImages.Add(ResourceType.Energy, this.resourceBars[i]);
 					this.resourceValues.Add(ResourceType.Energy, 0);
 					this.resourceLimits.Add(ResourceType.Energy, 0);
 					break;
 				case "Metal":
-					this.resourceImages.Add(ResourceType.Metal, this.resources[i]);
+					this.resourceImages.Add(ResourceType.Metal, this.resourceLogos[i]);
+					this.resourceBarImages.Add(ResourceType.Metal, this.resourceBars[i]);
 					this.resourceValues.Add(ResourceType.Metal, 0);
 					this.resourceLimits.Add(ResourceType.Metal, 0);
 					break;
@@ -132,11 +137,11 @@ public class HUD : MonoBehaviour {
 		GUI.skin = this.resourcesSkin;
 		GUI.BeginGroup(new Rect(0, 0, Screen.width, RESOURCE_BAR_HEIGHT));
 		GUI.Box(new Rect(0, 0, Screen.width, RESOURCE_BAR_HEIGHT), "");
-		int topPos = 4, iconLeft = 4, textLeft = 20;
-		this.DrawResourceIcon(ResourceType.Energy, iconLeft, textLeft, topPos);
-		iconLeft += TEXT_WIDTH;
-		textLeft += TEXT_WIDTH;
-		this.DrawResourceIcon(ResourceType.Metal, iconLeft, textLeft, topPos);
+		int iconLeft = 4, barLeft = 20 + (ICON_WIDTH / 2);
+		this.DrawResource(ResourceType.Energy, iconLeft, barLeft);
+		iconLeft += RESOURCE_WIDTH + ICON_WIDTH + RESOURCE_SPACE;
+		barLeft += RESOURCE_WIDTH + ICON_WIDTH + RESOURCE_SPACE;
+		this.DrawResource(ResourceType.Metal, iconLeft, barLeft);
 		GUI.EndGroup();
 	}
 
@@ -171,11 +176,35 @@ public class HUD : MonoBehaviour {
 
 	// --------------------------------------------------------------------------------------------
 	// Draw the resource icon
-	private void DrawResourceIcon(ResourceType type, int iconLeft, int textLeft, int topPos) {
+	private void DrawResource(ResourceType type, int iconLeft, int barLeft) {
+		// Draw resource icon
 		Texture2D icon = this.resourceImages[type];
-		string text = resourceValues[type].ToString() + "/" + resourceLimits[type].ToString();
-		GUI.DrawTexture(new Rect(iconLeft, topPos, ICON_WIDTH, ICON_HEIGHT), icon);
-		GUI.Label(new Rect(textLeft, topPos, TEXT_WIDTH, TEXT_HEIGHT), text);
+		GUI.DrawTexture(new Rect(iconLeft, ICON_TOP, ICON_WIDTH, ICON_HEIGHT), icon);
+
+		// Draw resource bar
+		this.resourceBar.normal.background = this.resourceBarImages[type];
+		float resourcePercentage = this.CalculateResourcePercentage(type);
+		int topBar = (RESOURCE_BAR_HEIGHT / 2) - (RESOURCE_HEIGHT / 2);
+		GUI.Label(new Rect(barLeft, topBar, RESOURCE_WIDTH * resourcePercentage, RESOURCE_HEIGHT), 
+			"", this.resourceBar);
+
+		// Draw current value
+		int topValue = topBar + RESOURCE_HEIGHT;
+		GUI.Label(new Rect(barLeft, topValue, RESOURCE_WIDTH, TEXT_HEIGHT), 
+			this.resourceValues[type].ToString());
+
+		// Draw limits
+		this.resourcesSkin.label.alignment = TextAnchor.MiddleLeft;
+		GUI.Label(new Rect(barLeft, 0, RESOURCE_WIDTH, TEXT_HEIGHT), "0");
+		this.resourcesSkin.label.alignment = TextAnchor.MiddleRight;
+		GUI.Label(new Rect(barLeft, 0, RESOURCE_WIDTH, TEXT_HEIGHT), this.resourceLimits[type].ToString());
+		this.resourcesSkin.label.alignment = TextAnchor.MiddleCenter;
+	}
+
+	// --------------------------------------------------------------------------------------------
+	// Calculate the percentage of a resource
+	private float CalculateResourcePercentage(ResourceType type) {
+		return (float)resourceValues[type] / resourceLimits[type];
 	}
 
 	// --------------------------------------------------------------------------------------------
@@ -193,7 +222,7 @@ public class HUD : MonoBehaviour {
 	// --------------------------------------------------------------------------------------------
 	// Draw the mouse cursor according to HUD
 	private void DrawMouseCursor() {
-		bool mouseOverHud = !MouseInBounds() && this.activeCursorState != CursorState.PanRight 
+		bool mouseOverHud = !this.MouseInBounds() && this.activeCursorState != CursorState.PanRight 
 			&& this.activeCursorState != CursorState.PanUp;
 		if(mouseOverHud) {
 			Cursor.visible = true;
@@ -355,7 +384,7 @@ public class HUD : MonoBehaviour {
 	// --------------------------------------------------------------------------------------------
 	// Draw orders slider
 	private void DrawSlider(int groupHeight, float numRows) {
-		//slider goes from 0 to the number of rows that do not fit on screen
+		// slider goes from 0 to the number of rows that do not fit on screen
 		this.sliderValue = GUI.VerticalSlider(this.GetScrollPos(groupHeight), this.sliderValue, 
 			0.0f, numRows - this.MaxNumRows(groupHeight));
 	}

@@ -90,11 +90,11 @@ public class WorldObject : MonoBehaviour {
 	protected virtual void CalculateCurrentHealth(float lowSplit, float highSplit) {
 		this.healthPercentage = (float)hitPoints / (float)maxHitPoints;
 		if(this.healthPercentage > highSplit) {
-			healthStyle.normal.background = ResourceManager.HealthyTexture;
+			this.healthStyle.normal.background = ResourceManager.HealthyTexture;
 		} else if(this.healthPercentage > lowSplit) {
-			healthStyle.normal.background = ResourceManager.DamagedTexture;
+			this.healthStyle.normal.background = ResourceManager.DamagedTexture;
 		} else {
-			healthStyle.normal.background = ResourceManager.CriticalTexture;
+			this.healthStyle.normal.background = ResourceManager.CriticalTexture;
 		}
 	}
 
@@ -103,8 +103,8 @@ public class WorldObject : MonoBehaviour {
 	protected void DrawHealthBar(Rect selectBox, string label) {
 		this.healthStyle.padding.top = -20;
 		this.healthStyle.fontStyle = FontStyle.Bold;
-		GUI.Label(new Rect(selectBox.x, selectBox.y - 7, selectBox.width * this.healthPercentage, 5),
-			label, this.healthStyle);
+		GUI.Label(new Rect(selectBox.x, selectBox.y - 7, selectBox.width * this.healthPercentage, 
+			5),	label, this.healthStyle);
 	}
 
 	// --------------------------------------------------------------------------------------------
