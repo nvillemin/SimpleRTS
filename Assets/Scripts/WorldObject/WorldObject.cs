@@ -211,4 +211,15 @@ public class WorldObject : MonoBehaviour {
 	public bool NeedsBuilding() {
 		return this.needsBuilding;
 	}
+
+	// --------------------------------------------------------------------------------------------
+	public int GetProductionValue(ResourceType type, bool getCost) {
+		int value;
+		if(getCost) {
+			value = (type == ResourceType.Energy) ? this.energyCost : this.metalCost;
+		} else {
+			value = (type == ResourceType.Energy) ? this.energyProd : this.metalProd;
+		}
+		return value;
+	}
 }

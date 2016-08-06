@@ -8,7 +8,7 @@ public class HUD : MonoBehaviour {
 	// CONSTANTS
 	private const int ORDERS_BAR_WIDTH = 150, RESOURCE_BAR_HEIGHT = 40, SELECTION_NAME_HEIGHT = 15,
 		ICON_WIDTH = 32, ICON_HEIGHT = 32, ICON_TOP = 4, RESOURCE_WIDTH = 256, RESOURCE_HEIGHT = 8, 
-		RESOURCE_SPACE = 16, TEXT_HEIGHT = 16, BUILD_IMAGE_WIDTH = 64, BUILD_IMAGE_HEIGHT = 64, 
+		RESOURCE_SPACE = 64, TEXT_HEIGHT = 16, BUILD_IMAGE_WIDTH = 64, BUILD_IMAGE_HEIGHT = 64, 
 		BUTTON_SPACING = 7, SCROLL_BAR_WIDTH = 22, BUILD_IMAGE_PADDING = 8;
 
 	// --------------------------------------------------------------------------------------------
@@ -194,10 +194,21 @@ public class HUD : MonoBehaviour {
 			this.resourceValues[type].ToString());
 
 		// Draw limits
-		this.resourcesSkin.label.alignment = TextAnchor.MiddleLeft;
-		GUI.Label(new Rect(barLeft, 0, RESOURCE_WIDTH, TEXT_HEIGHT), "0");
 		this.resourcesSkin.label.alignment = TextAnchor.MiddleRight;
 		GUI.Label(new Rect(barLeft, 0, RESOURCE_WIDTH, TEXT_HEIGHT), this.resourceLimits[type].ToString());
+		this.resourcesSkin.label.alignment = TextAnchor.MiddleLeft;
+		GUI.Label(new Rect(barLeft, 0, RESOURCE_WIDTH, TEXT_HEIGHT), "0");
+
+		// Draw production and cost
+		int textLeft = barLeft + RESOURCE_WIDTH + 10;
+		int production = this.player.GetResourceProd(type, false);
+		this.resourcesSkin.label.normal.textColor = Color.green;
+		GUI.Label(new Rect(textLeft, 7, RESOURCE_SPACE, TEXT_HEIGHT), "+ " + production.ToString());
+		int cost = this.player.GetResourceProd(type, true);
+		this.resourcesSkin.label.normal.textColor = Color.red;
+		GUI.Label(new Rect(textLeft, 18, RESOURCE_SPACE, TEXT_HEIGHT), "– " + cost.ToString());
+
+		this.resourcesSkin.label.normal.textColor = Color.white;
 		this.resourcesSkin.label.alignment = TextAnchor.MiddleCenter;
 	}
 

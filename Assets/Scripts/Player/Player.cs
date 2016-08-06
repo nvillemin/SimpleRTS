@@ -207,4 +207,24 @@ public class Player : MonoBehaviour {
 		this.tempBuilding = null;
 		this.tempCreator = null;
 	}
+
+	// --------------------------------------------------------------------------------------------
+	// Returns the current production for a resource
+	public int GetResourceProd(ResourceType type, bool getCost) {
+		int total = 0;
+
+		Units units = GetComponentInChildren<Units>();
+		foreach(Transform child in units.transform) {
+			Unit unit = child.gameObject.GetComponent<Unit>();
+			total += unit.GetProductionValue(type, getCost);
+		}
+
+		Buildings buildings = GetComponentInChildren<Buildings>();
+		foreach(Transform child in buildings.transform) {
+			Building building = child.gameObject.GetComponent<Building>();
+			total += building.GetProductionValue(type, getCost);
+		}
+
+		return total;
+	}
 }
